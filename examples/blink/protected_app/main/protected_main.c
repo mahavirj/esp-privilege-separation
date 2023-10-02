@@ -54,7 +54,7 @@ void app_main()
     }
 
     for (int i = 0; ; i++) {
-       ets_printf("Hello from protected environment\n");
+       esp_rom_printf("Hello from protected environment\n");
        vTaskDelay(500);
     }
 }

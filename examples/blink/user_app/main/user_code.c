@@ -15,15 +15,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
 #include "syscall_wrappers.h"
 
 #include "soc/gpio_struct.h"
 #include "hal/gpio_types.h"
 #include "driver/gpio.h"
 #include "hal/gpio_ll.h"
+#include "rom/gpio.h"
 #include "ws2812.h"
 
 #include "esp_log.h"
+#include "esp_vfs.h"
 
 #if CONFIG_IDF_TARGET_ESP32C3
 #define WS2812_GPIO     8
