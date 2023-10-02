@@ -6,4 +6,5 @@ else()
 endif()
 
 idf_component_register(SRCS ${src}
-                       INCLUDE_DIRS "include")
+                       INCLUDE_DIRS "include"
+                       PRIV_REQUIRES vfs driver)

@@ -18,6 +18,7 @@
 #include <esp_image_format.h>
 #include <esp_ota_ops.h>
 #include <esp_log.h>
+#include <spi_flash_mmap.h>
 
 #ifdef CONFIG_IDF_TARGET_ESP32C3
 #include <esp32c3/rom/crc.h>

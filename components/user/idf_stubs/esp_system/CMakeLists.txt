@@ -12,7 +12,7 @@ if((${IDF_VERSION_MAJOR} EQUAL 4) AND (${IDF_VERSION_MINOR} EQUAL 3))
              "${esp_system_dir}/startup.c"
              "${esp_system_dir}/system_time.c"
              "${esp_system_dir}/sleep_modes.c")
-elseif((${IDF_VERSION_MAJOR} EQUAL 4) AND (${IDF_VERSION_MINOR} EQUAL 4))
+elseif((${IDF_VERSION_MAJOR} EQUAL 5) AND (${IDF_VERSION_MINOR} EQUAL 2))
     set(srcs "${esp_system_dir}/esp_err.c")
 
     if(CONFIG_IDF_ENV_FPGA)
@@ -28,20 +28,24 @@ elseif((${IDF_VERSION_MAJOR} EQUAL 4) AND (${IDF_VERSION_MINOR} EQUAL 4))
             "${esp_system_dir}/startup.c"
             "${esp_system_dir}/system_time.c"
             "${esp_system_dir}/stack_check.c"
-            "${esp_system_dir}/task_wdt.c"
+            "${esp_system_dir}/port/esp_system_chip.c"
             "${esp_system_dir}/ubsan.c"
             "${esp_system_dir}/xt_wdt.c"
             "${esp_system_dir}/debug_stubs.c")
 
+    if(CONFIG_ESP_TASK_WDT_EN)
+        list(APPEND srcs "task_wdt/task_wdt.c")
+    endif()
+
     if(CONFIG_ESP_SYSTEM_USE_EH_FRAME)
         list(APPEND srcs "${esp_system_dir}/eh_frame_parser.c")
     endif()
-    list(APPEND priv_requires espcoredump esp_phy efuse esp_ipc)
+    list(APPEND priv_requires espcoredump esp_phy efuse esp_wifi vfs)
     list(APPEND ld_fragments ${esp_system_dir}/app.lf)
 endif()
 
 idf_component_register(SRCS ${srcs}
-                       INCLUDE_DIRS ${esp_system_dir}/include
+                       INCLUDE_DIRS ${esp_system_dir}/include ${esp_system_dir}/port/include/private
                        PRIV_REQUIRES ${priv_requires}
                        LDFRAGMENTS ${ld_fragments})
 

@@ -41,14 +41,17 @@ idf_component_get_property(bootloader_support_dir bootloader_support COMPONENT_D
 
 set(includes "include"
              "include/${target}"
-             "${bootloader_support_dir}/include_bootloader")
+             "${bootloader_support_dir}/private_include")
 
 idf_component_register(SRCS ${srcs}
                     INCLUDE_DIRS ${includes}
                     PRIV_INCLUDE_DIRS "."
-                    PRIV_REQUIRES bootloader_support spi_flash app_update console esp_priv_build_utils mbedtls
+                    PRIV_REQUIRES bootloader_support spi_flash app_update console esp_priv_build_utils mbedtls esp_timer
+                    REQUIRES esp_partition
                     EMBED_TXTFILES ${cacert})
 
 if(CONFIG_PA_ENABLE_USER_APP_SECURE_BOOT OR CONFIG_SECURE_SIGNED_ON_UPDATE_NO_SECURE_BOOT)
     target_link_libraries(${COMPONENT_LIB} INTERFACE "-Wl,--wrap=esp_secure_boot_verify_rsa_signature_block")
 endif()
+
+target_compile_options(${COMPONENT_LIB} PRIVATE "-Wno-format")

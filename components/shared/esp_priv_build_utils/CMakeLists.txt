@@ -7,7 +7,7 @@ if (USER_APP_BUILD)
 
     if((${IDF_VERSION_MAJOR} EQUAL 4) AND (${IDF_VERSION_MINOR} EQUAL 3))
         set(peripherals_ld $ENV{IDF_PATH}/components/${IDF_TARGET}/ld/${IDF_TARGET}.peripherals.ld)
-    elseif((${IDF_VERSION_MAJOR} EQUAL 4) AND (${IDF_VERSION_MINOR} EQUAL 4))
+    elseif((${IDF_VERSION_MAJOR} EQUAL 5) AND (${IDF_VERSION_MINOR} EQUAL 2))
         set(peripherals_ld $ENV{IDF_PATH}/components/soc/${IDF_TARGET}/ld/${IDF_TARGET}.peripherals.ld)
     endif()
     target_linker_script(${COMPONENT_LIB} INTERFACE ${peripherals_ld})

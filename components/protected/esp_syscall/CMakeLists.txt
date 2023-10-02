@@ -25,7 +25,7 @@ set(includes
 idf_component_register(SRCS ${srcs}
                     INCLUDE_DIRS ${includes}
                     PRIV_INCLUDE_DIRS  ${private_include_dirs}
-                    PRIV_REQUIRES esp_wifi nvs_flash esp_priv_access esp_priv_build_utils syscall_shared driver esp_user_ota)
+                    PRIV_REQUIRES riscv esp_wifi nvs_flash esp_priv_access esp_priv_build_utils syscall_shared driver esp_user_ota esp_timer)
 
 if(CONFIG_IDF_TARGET_ARCH_XTENSA)
     target_link_libraries(${COMPONENT_TARGET} "-u force_linker_to_include")

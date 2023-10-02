@@ -86,13 +86,13 @@ static void panic_print_registers(const void *f, int core)
         "MSTATUS ", "MTVEC   ", "MCAUSE  ", "MTVAL   ", "MHARTID "
     };
 
-    ets_printf("Core  %d register dump:", ((RvExcFrame *)f)->mhartid);
+    esp_rom_printf("Core  %d register dump:", ((RvExcFrame *)f)->mhartid);
 
     for (int x = 0; x < sizeof(desc) / sizeof(desc[0]); x += 4) {
-        ets_printf("\r\n");
+        esp_rom_printf("\r\n");
         for (int y = 0; y < 4 && x + y < sizeof(desc) / sizeof(desc[0]); y++) {
             if (desc[x + y][0] != 0) {
-                ets_printf("%s: 0x%08x  ", desc[x + y], regs[x + y]);
+                esp_rom_printf("%s: 0x%08x  ", desc[x + y], regs[x + y]);
             }
         }
     }
@@ -100,14 +100,14 @@ static void panic_print_registers(const void *f, int core)
 
 static void print_stack_dump(void *frame)
 {
-    ets_printf("\r\n\r\nStack memory:\r\n");
+    esp_rom_printf("\r\n\r\nStack memory:\r\n");
     uint32_t sp = (uint32_t)((RvExcFrame *)frame)->sp;
     const int per_line = 8;
     for (int x = 0; x < 1024; x += per_line * sizeof(uint32_t)) {
         uint32_t *spp = (uint32_t *)(sp + x);
-        ets_printf("%08x: ", sp + x);
+        esp_rom_printf("%08x: ", sp + x);
         for (int y = 0; y < per_line; y++) {
-            ets_printf("0x%08x%s", spp[y], y == per_line - 1 ? "\r\n" : " ");
+            esp_rom_printf("0x%08x%s", spp[y], y == per_line - 1 ? "\r\n" : " ");
         }
     }
 }
@@ -125,13 +125,13 @@ static void panic_print_registers(const void *f, int core)
         "A14     ", "A15     ", "SAR     ", "EXCCAUSE", "EXCVADDR", "LBEG    ", "LEND    ", "LCOUNT  "
     };
 
-    ets_printf("Core %d register dump:", core);
+    esp_rom_printf("Core %d register dump:", core);
 
     for (int x = 0; x < 24; x += 4) {
-        ets_printf("\r\n");
+        esp_rom_printf("\r\n");
         for (int y = 0; y < 4; y++) {
             if (sdesc[x + y][0] != 0) {
-                ets_printf("%s: 0x%08x  ", sdesc[x + y], regs[x + y + 1]);
+                esp_rom_printf("%s: 0x%08x  ", sdesc[x + y], regs[x + y + 1]);
             }
         }
     }
@@ -170,11 +170,11 @@ IRAM_ATTR void esp_priv_access_handle_crashed_task(void)
 #endif
 
     esp_priv_access_int_t intr = esp_priv_access_get_int_status();
-    ets_printf("\n=================================================\n");
-    ets_printf("User app exception occurred:\n");
+    esp_rom_printf("\n=================================================\n");
+    esp_rom_printf("User app exception occurred:\n");
     if (intr != 0) {
         if (_is_task_wdt_timeout) {
-            ets_printf("Guru Meditation Error: Task WDT timeout\n");
+            esp_rom_printf("Guru Meditation Error: Task WDT timeout\n");
             /* Replace the PC with the actual PC that caused the task WDT to trigger */
 #if CONFIG_IDF_TARGET_ARCH_RISCV
             ((RvExcFrame *)frame)->mepc = (uint32_t)_task_wdt_user_epc;
@@ -183,14 +183,14 @@ IRAM_ATTR void esp_priv_access_handle_crashed_task(void)
 #endif
             _is_task_wdt_timeout = 0;
         } else {
-            ets_printf("Guru Meditation Error: Illegal %s access: Fault addr: 0x%x\n", esp_priv_access_int_type_to_str(intr), esp_priv_access_get_fault_addr(intr));
+            esp_rom_printf("Guru Meditation Error: Illegal %s access: Fault addr: 0x%x\n", esp_priv_access_int_type_to_str(intr), esp_priv_access_get_fault_addr(intr));
         }
         esp_priv_access_clear_and_reenable_int(intr);
     } else {
-        ets_printf("Guru Meditation Error: %s\n", reason[mcause]);
+        esp_rom_printf("Guru Meditation Error: %s\n", reason[mcause]);
     }
-    ets_printf("Troubling task: %s\n", pcTaskGetName(NULL));
-    ets_printf("=================================================\n");
+    esp_rom_printf("Troubling task: %s\n", pcTaskGetName(NULL));
+    esp_rom_printf("=================================================\n");
 
 #ifdef CONFIG_PA_BACKTRACE_INFO
 #if CONFIG_IDF_TARGET_ARCH_RISCV
@@ -204,24 +204,24 @@ IRAM_ATTR void esp_priv_access_handle_crashed_task(void)
 
     char sha256_buf[65];
     esp_ota_get_app_elf_sha256(sha256_buf, sizeof(sha256_buf));
-    ets_printf("\r\n\r\n\r\nELF file SHA256: %s\r\n\r\n", sha256_buf);
-    ets_printf("=================================================\n");
+    esp_rom_printf("\r\n\r\n\r\nELF file SHA256: %s\r\n\r\n", sha256_buf);
+    esp_rom_printf("=================================================\n");
 #endif
 
 #ifdef CONFIG_PA_DELETE_VIOLATING_TASK
-    ets_printf("Deleting %s...\n", pcTaskGetName(curr_handle));
+    esp_rom_printf("Deleting %s...\n", pcTaskGetName(curr_handle));
     vTaskDelete(curr_handle);
-    ets_printf("=================================================\n");
+    esp_rom_printf("=================================================\n");
     portYIELD_FROM_ISR();
 #elif CONFIG_PA_RESTART_USER_APP
     esp_priv_access_user_reboot();
-    ets_printf("Preparing to restart user_app...\n");
-    ets_printf("=================================================\n");
+    esp_rom_printf("Preparing to restart user_app...\n");
+    esp_rom_printf("=================================================\n");
     portYIELD_FROM_ISR();
 #elif CONFIG_PA_REBOOT_ENTIRE_SYSTEM
-    ets_printf("Rebooting...\n");
-    ets_printf("=================================================\n");
-    esp_restart_noos_dig();
+    esp_rom_printf("Rebooting...\n");
+    esp_rom_printf("=================================================\n");
+    esp_restart_noos();
 #endif
 }
 

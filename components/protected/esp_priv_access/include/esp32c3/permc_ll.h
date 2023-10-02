@@ -19,7 +19,8 @@
 #include "soc/sensitive_reg.h"
 #include "soc/interrupt_reg.h"
 #include "soc/extmem_reg.h"
-#include "soc/apb_ctrl_reg.h"
+//#include "soc/apb_ctrl_reg.h"
+#include "soc/syscon_reg.h"
 #include "esp_intr_alloc.h"
 #include "hal/memprot_ll.h"
 

@@ -40,7 +40,8 @@
 
 #include "esp_rom_md5.h"
 
-#include <esp_spi_flash.h>
+//#include <esp_spi_flash.h>
+#include <spi_flash_mmap.h>
 #include <esp_partition.h>
 #include <esp_rom_uart.h>
 
@@ -312,7 +313,7 @@ int sys_xTaskCreate(TaskFunction_t pvTaskCode,
     int *usr_errno = NULL;
     int err = pdPASS;
 
-    xtaskTCB = heap_caps_malloc(sizeof(StaticTask_t), portTcbMemoryCaps);
+    xtaskTCB = heap_caps_malloc(sizeof(StaticTask_t), MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT);
     if (xtaskTCB == NULL) {
         ESP_LOGE(TAG, "Insufficient memory for TCB");
         return errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY;
@@ -327,7 +328,7 @@ int sys_xTaskCreate(TaskFunction_t pvTaskCode,
         goto failure;
     }
 
-    kernel_stack = heap_caps_malloc(KERNEL_STACK_SIZE, portStackMemoryCaps);
+    kernel_stack = heap_caps_malloc(KERNEL_STACK_SIZE, MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT);
     if (kernel_stack == NULL) {
         ESP_LOGE(TAG, "Insufficient memory for kernel stack");
         err = errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY;
@@ -596,7 +597,7 @@ int sys_xPortInterruptedFromISRContext(void)
 int sys_vPortSetInterruptMask(void)
 {
 #if CONFIG_IDF_TARGET_ARCH_RISCV
-    return vPortSetInterruptMask();
+    return portSET_INTERRUPT_MASK_FROM_ISR();
 #else
     return 0;
 #endif
@@ -605,7 +606,7 @@ int sys_vPortSetInterruptMask(void)
 void sys_vPortClearInterruptMask(int mask)
 {
 #if CONFIG_IDF_TARGET_ARCH_RISCV
-    vPortClearInterruptMask(mask);
+    portCLEAR_INTERRUPT_MASK_FROM_ISR(mask);
 #endif
 }
 

@@ -14,19 +14,21 @@
 
 #include <string.h>
 #include <esp_image_format.h>
-#include <esp_spi_flash.h>
 #include <esp_partition.h>
 #include "esp_log.h"
 #include "esp_intr_alloc.h"
+#include "esp_memory_utils.h"
 #include "esp_priv_access.h"
 #include "esp_priv_access_priv.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
+#include "freertos/task_snapshot.h"
 #include "soc/world_controller_reg.h"
 #include "soc/sensitive_reg.h"
 #include "soc/extmem_reg.h"
-#include "soc/cache_memory.h"
+//#include "soc/cache_memory.h"
+#include "esp_timer.h"
 #include "soc/soc.h"
 #include "soc_defs.h"
 #include "permc_ll.h"
@@ -50,6 +52,7 @@
 #endif
 
 #include "esp_heap_caps_init.h"
+#include "heap_memory_layout.h"
 
 #ifdef CONFIG_PA_ENABLE_USER_APP_SECURE_BOOT
 #define USER_BOOT_TASK_STACK_SZ         5120
@@ -105,7 +108,7 @@ static void esp_priv_access_iram_int_en(uint8_t int_num)
 {
     permc_ll_iram_enable_int();
 
-    intr_matrix_set(PRO_CPU_NUM, permc_ll_iram_get_int_source_num(), int_num);
+    esp_rom_route_intr_matrix(PRO_CPU_NUM, permc_ll_iram_get_int_source_num(), int_num);
 }
 
 /* Enable DRAM permission violation interrupt */
@@ -113,7 +116,7 @@ static void esp_priv_access_dram_int_en(uint8_t int_num)
 {
     permc_ll_dram_enable_int();
 
-    intr_matrix_set(PRO_CPU_NUM, permc_ll_dram_get_int_source_num(), int_num);
+    esp_rom_route_intr_matrix(PRO_CPU_NUM, permc_ll_dram_get_int_source_num(), int_num);
 }
 
 /* Enable Flash cache permission violation interrupt */
@@ -122,7 +125,7 @@ static void esp_priv_access_flash_cache_int_en(uint8_t int_num)
     permc_ll_flash_icache_enable_int();
     permc_ll_flash_dcache_enable_int();
 
-    intr_matrix_set(PRO_CPU_NUM, permc_ll_flash_cache_get_int_source_num(), int_num);
+    esp_rom_route_intr_matrix(PRO_CPU_NUM, permc_ll_flash_cache_get_int_source_num(), int_num);
 }
 
 /* Enable PIF bus permission violation interrupt */
@@ -130,7 +133,7 @@ static void esp_priv_access_pif_int_en(uint8_t int_num)
 {
     permc_ll_pif_enable_int();
 
-    intr_matrix_set(PRO_CPU_NUM, permc_ll_pif_get_int_source_num(), int_num);
+    esp_rom_route_intr_matrix(PRO_CPU_NUM, permc_ll_pif_get_int_source_num(), int_num);
 }
 
 /* Wrapper permission violation interrupt handler.
@@ -566,14 +569,14 @@ esp_err_t esp_priv_access_user_boot()
 /* Routine to suspend all the user space tasks */
 static void suspend_user_tasks()
 {
-    ets_printf("Suspending user tasks\n");
+    esp_rom_printf("Suspending user tasks\n");
     TaskHandle_t handle = NULL;
     TaskSnapshot_t *snapshots = NULL;
     uint32_t task_count = uxTaskGetNumberOfTasks();
     /* Calloc is called from ISR context and can fail in some scenarios */
     snapshots = calloc(task_count, sizeof(TaskSnapshot_t));
     if (!snapshots) {
-        ets_printf("Not enough memory to store task snapshots\n");
+        esp_rom_printf("Not enough memory to store task snapshots\n");
         return;
     }
     unsigned int tcb_size;
@@ -585,7 +588,7 @@ static void suspend_user_tasks()
             // Keep it as it is
             continue;
         }
-        ets_printf("Suspending user task: %s\n", pcTaskGetTaskName(handle));
+        esp_rom_printf("Suspending user task: %s\n", pcTaskGetName(handle));
         vTaskSuspend(handle);
     }
     free(snapshots);

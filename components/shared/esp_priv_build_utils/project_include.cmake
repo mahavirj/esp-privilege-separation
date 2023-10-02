@@ -5,7 +5,6 @@ idf_build_get_property(sdkconfig SDKCONFIG)
 idf_build_get_property(config_dir CONFIG_DIR)
 idf_build_get_property(python PYTHON)
 idf_build_get_property(extra_cmake_args EXTRA_CMAKE_ARGS)
-idf_build_get_property(toolprefix CONFIG_SDK_TOOLPREFIX)
 
 if(USER_APP_BUILD)
     return()
@@ -57,7 +56,7 @@ idf_component_get_property(esp_priv_build_utils_dir esp_priv_build_utils COMPONE
 
 add_custom_command(
     OUTPUT ${config_dir}/memory_layout.h
-    COMMAND ${esp_priv_build_utils_dir}/utility/extract_memory_boundaries.sh ${toolprefix} ${build_dir}/${PROJECT_NAME}.elf ${config_dir}/memory_layout.h
+    COMMAND ${esp_priv_build_utils_dir}/utility/extract_memory_boundaries.sh ${_CMAKE_TOOLCHAIN_PREFIX} ${build_dir}/${PROJECT_NAME}.elf ${config_dir}/memory_layout.h
     DEPENDS ${build_dir}/${PROJECT_NAME}.elf
     VERBATIM)
 
@@ -147,4 +146,4 @@ if(CONFIG_PA_ENABLE_USER_APP_SECURE_BOOT)
         VERBATIM)
 endif()
 
-add_dependencies(app gen_lib_list_in_json_fmt)
+#add_dependencies(app gen_lib_list_in_json_fmt)

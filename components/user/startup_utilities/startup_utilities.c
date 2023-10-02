@@ -32,6 +32,7 @@
 #include "esp_heap_caps_init.h"
 #include "esp_rom_md5.h"
 #include "esp_log.h"
+#include "heap_memory_layout.h"
 
 #include "syscall_structs.h"
 

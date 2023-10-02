@@ -15,13 +15,16 @@ if(CONFIG_IDF_TARGET_ARCH_XTENSA)
 
 elseif(CONFIG_IDF_TARGET_ARCH_RISCV)
     set(include_dirs
-        ${freertos_dir}/include
-        ${freertos_dir}/port/riscv/include)
+        ${freertos_dir}/config/include
+        ${freertos_dir}/config/include/freertos
+        ${freertos_dir}/config/riscv/include
+        ${freertos_dir}/FreeRTOS-Kernel/include
+        ${freertos_dir}/FreeRTOS-Kernel/portable/riscv/include)
 
-    if((${IDF_VERSION_MAJOR} EQUAL 4) AND (${IDF_VERSION_MINOR} EQUAL 4))
+    if((${IDF_VERSION_MAJOR} EQUAL 5) AND (${IDF_VERSION_MINOR} EQUAL 2))
         list(APPEND include_dirs
-            ${freertos_dir}/include/esp_additions/freertos
-            ${freertos_dir}/include/esp_additions)
+            ${freertos_dir}/esp_additions/include/freertos
+            ${freertos_dir}/esp_additions/include)
     endif()
 
 endif()

@@ -14,11 +14,13 @@
 
 #include <string.h>
 #include <esp_image_format.h>
-#include <esp_spi_flash.h>
+//#include <esp_spi_flash.h>
+#include <spi_flash_mmap.h>
 #include <esp_partition.h>
 #include "esp_priv_access_ota_utils.h"
 #include "esp_log.h"
 #include "esp_fault.h"
+#include "esp_app_desc.h"
 
 #if CONFIG_IDF_TARGET_ESP32C3
 #include "esp32c3/rom/cache.h"
@@ -44,12 +46,13 @@
 #include "soc/world_controller_reg.h"
 #include "soc/sensitive_reg.h"
 #include "soc/extmem_reg.h"
-#include "soc/cache_memory.h"
+//#include "soc/cache_memory.h"
 #include "soc/soc.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "soc_defs.h"
+#include "soc/ext_mem_defs.h"
 
 #include "esp_priv_access_priv.h"
 #include "esp_priv_access.h"
@@ -140,11 +143,11 @@ static IRAM_ATTR NOINLINE_ATTR void user_load_app(const esp_image_metadata_t* da
 
     uint32_t drom_page_count = user_cache_pages_to_map(drom_size, drom_load_addr);
 
-    Cache_Dbus_MMU_Set(MMU_ACCESS_FLASH, drom_load_addr & MMU_FLASH_MASK, drom_addr & MMU_FLASH_MASK, 64, drom_page_count, 0);
+    Cache_Dbus_MMU_Set(SOC_MMU_ACCESS_FLASH, drom_load_addr & MMU_FLASH_MASK, drom_addr & MMU_FLASH_MASK, 64, drom_page_count, 0);
 
     uint32_t irom_page_count = user_cache_pages_to_map(irom_size, irom_load_addr);
 
-    Cache_Ibus_MMU_Set(MMU_ACCESS_FLASH, irom_load_addr & MMU_FLASH_MASK, irom_addr & MMU_FLASH_MASK, 64, irom_page_count, 0);
+    Cache_Ibus_MMU_Set(SOC_MMU_ACCESS_FLASH, irom_load_addr & MMU_FLASH_MASK, irom_addr & MMU_FLASH_MASK, 64, irom_page_count, 0);
 
     kernel_cache_restore(ret);
 }
@@ -189,7 +192,7 @@ esp_err_t esp_priv_access_user_unpack(esp_image_metadata_t *user_img_data)
                     ESP_LOGI(TAG, "Section loading at vaddr:%p paddr:0x%x (%d)", load_addr,
                             user_img_data->start_addr + user_img_data->segment_data[i], user_img_data->segments[i].data_len);
 
-                    spi_flash_read(user_partition->address + user_img_data->segment_data[i],
+                    esp_rom_spiflash_read(user_partition->address + user_img_data->segment_data[i],
                             load_addr, user_img_data->segments[i].data_len);
                 }
             }

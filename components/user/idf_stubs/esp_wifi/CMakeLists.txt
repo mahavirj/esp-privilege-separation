@@ -4,7 +4,7 @@ set(esp_wifi_dir ${idf_path}/components/esp_wifi)
 
 if((${IDF_VERSION_MAJOR} EQUAL 4) AND (${IDF_VERSION_MINOR} EQUAL 3))
     set(include_dirs ${esp_wifi_dir}/include ${esp_wifi_dir}/${idf_target}/include)
-elseif((${IDF_VERSION_MAJOR} EQUAL 4) AND (${IDF_VERSION_MINOR} EQUAL 4))
+elseif((${IDF_VERSION_MAJOR} EQUAL 5) AND (${IDF_VERSION_MINOR} EQUAL 2))
     set(include_dirs ${esp_wifi_dir}/include)
 endif()
 idf_component_register(INCLUDE_DIRS ${include_dirs}
